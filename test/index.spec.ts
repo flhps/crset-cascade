@@ -140,14 +140,30 @@ test("if the invalid VC is in the BLoomfilter with the correct implementation of
 
 test("serialized the bloomfilter correctly", () => {
   const deserializedResult = fromDataHexString(toDataHexString(result));
-  for (let i = 0; i < deserializedResult[0].length; i++) {
-    (deserializedResult[0][i] as BloomFilter)._locations = (
-      result[0][i] as BloomFilter
-    )._locations;
-  }
+  
+  // Test that both filters behave the same way
+  validTestSet.forEach(id => {
+    const originalResult = isInBFC(id, result[0], result[1]);
+    const deserializedResultValue = isInBFC(id, deserializedResult[0], deserializedResult[1]);
+    expect(originalResult).toBe(deserializedResultValue);
+  });
+
+  invalidTestSet.forEach(id => {
+    const originalResult = isInBFC(id, result[0], result[1]);
+    const deserializedResultValue = isInBFC(id, deserializedResult[0], deserializedResult[1]);
+    expect(originalResult).toBe(deserializedResultValue);
+  });
+
+  // Compare salt strings
   expect(result[1]).toStrictEqual(deserializedResult[1]);
-  expect(result[0]).toStrictEqual(deserializedResult[0]);
-  expect(result).toStrictEqual(deserializedResult);
+  
+  // Compare lengths
+  expect(result[0].length).toStrictEqual(deserializedResult[0].length);
+  
+  // Compare the actual bit arrays of each filter
+  for (let i = 0; i < result[0].length; i++) {
+    expect(result[0][i].buckets).toStrictEqual(deserializedResult[0][i].buckets);
+  }
 });
 
 test("see if serialized deserialized bloomfilter works properly", () => {

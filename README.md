@@ -1,6 +1,6 @@
 # padded-bloom-filter-cascade
 
-This project implements a padded Bloom Filter Cascade, based on the [*bloomfilter-sha256*](https://github.com/jfelixh/bloomfilter-sha256) library. It provides utility functions to construct, reconstruct, and verify the presence of elements within the padded Bloom Filter Cascade.
+This project implements a padded Bloom Filter Cascade based on `sha256`. It provides utility functions to construct, reconstruct, and verify the presence of elements within the padded Bloom Filter Cascade.
 
 ## Usage
 To use the padded Bloom Filter Cascade, install the package via npm:
@@ -33,7 +33,7 @@ console.log(result); // true if the element is in the Bloom Filter Cascade, fals
 ```
 
 ## Testing
-To verify that the Bloom Filter implementation works as expected, run the following command in the root directory:
+To verify that this implementation works as expected, run the following command in the root directory:
 ```
 npm test
 ```
@@ -41,9 +41,4 @@ npm test
 ## Links and References
 - ![arXiv](https://img.shields.io/badge/arXiv-2501.17089-b31b1b.svg) 
   **[CRSet: Non-Interactive Verifiable Credential Revocation with Metadata Privacy for Issuers and Everyone Else](https://arxiv.org/abs/2501.17089)**  
-  *Hoops et al., 2025.*  
-- [![IEEE Xplore](https://img.shields.io/badge/IEEE%20Xplore-7958597-blue)](https://ieeexplore.ieee.org/document/7958597) 
-**[CRLite: A Scalable System for Pushing All TLS Revocations to All Browsers](https://ieeexplore.ieee.org/document/7958597)**
-*Larisch et al., 2025.* 
-- ![GitHub](https://img.shields.io/badge/GitHub-bloomfilter--sha256-blue?logo=github)
-    **[bloomfilter-sha256](https://github.com/jfelixh/bloomfilter-sha256)**
+  *Hoops et al., 2025.*

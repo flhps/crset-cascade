@@ -1,4 +1,4 @@
-import { BloomFilter } from "bloomfilter";
+import { BloomFilter } from "./bloom-filter";
 import {
   binaryStringToBuffer,
   convertSetToBinary,
@@ -122,31 +122,36 @@ export function isInBFC(
  */
 export function toDataHexString(bfc: [BloomFilter[], string]): string {
   const serializedCascade = bfc[0].map((filter) => {
-    // Serialization from npm documentation
-    var array = [].slice.call(filter.buckets);
+    // Create a buffer from the filter's buckets
+    const buffer = Buffer.from(
+      filter.buckets.buffer,
+      filter.buckets.byteOffset,
+      filter.buckets.byteLength
+    );
 
-    // Create and fill the buffer with the filter content
-    const buffer =
-      filter.buckets instanceof Int32Array ? filter.buckets.buffer : null;
-    const currentFilterBuffer = Buffer.from(buffer!);
-
-    // Allocate 4 Bytes for lengthPrefix. The more items we have, the bigger the length would be
+    // Allocate 4 bytes for length prefix
     const lengthPrefix = Buffer.alloc(4);
-    lengthPrefix.writeUInt32BE(currentFilterBuffer.length, 0); // Store the length in the Buffer using big endian
-    // For each filter concatinate the filter itself with its length
-    return Buffer.concat([lengthPrefix, currentFilterBuffer]);
+    lengthPrefix.writeUInt32BE(buffer.length, 0);
+    
+    // Also store the size of the filter (m) as this is needed for reconstruction
+    const sizePrefix = Buffer.alloc(4);
+    sizePrefix.writeUInt32BE(filter['m'], 0);
+    
+    return Buffer.concat([lengthPrefix, sizePrefix, buffer]);
   });
 
   // Create a Buffer to store the salt
   const serializedSalt = binaryStringToBuffer(bfc[1]);
+  
   // Create a Buffer from the array of Buffers
   const serializedCascadeBuffer = Buffer.concat(serializedCascade);
-  // Concatinate the salt and the buffer of filterCascade
+  
+  // Concatenate the salt and the buffer of filterCascade
   const serializedArray = Buffer.concat([
     serializedSalt,
     serializedCascadeBuffer,
   ]);
-  // Return a string hex value
+  
   return `0x${serializedArray.toString("hex")}`;
 }
 
@@ -169,7 +174,7 @@ export function toDataHexString(bfc: [BloomFilter[], string]): string {
  * 6. Returns the array of BloomFilter objects and the salt string.
  */
 export function fromDataHexString(serialized: string): [BloomFilter[], string] {
-  // Create a buffer from the string hex value by first removing 0x
+  // Create a buffer from the hex string
   const buffer = Buffer.from(serialized.slice(2), "hex");
 
   // Extract the salt - the first 32 bytes
@@ -183,25 +188,32 @@ export function fromDataHexString(serialized: string): [BloomFilter[], string] {
   let startIndex = 32;
   while (startIndex < buffer.length) {
     // Read the length which takes 4 bytes
-    const lengthPrefix = buffer.readUInt32BE(startIndex);
+    const length = buffer.readUInt32BE(startIndex);
+    startIndex += 4;
+
+    // Read the filter size (m) which takes 4 bytes
+    const m = buffer.readUInt32BE(startIndex);
     startIndex += 4;
 
     // Read the Bloom filter content
     const filterContent = buffer.subarray(
       startIndex,
-      startIndex + lengthPrefix
+      startIndex + length
     );
-    startIndex += lengthPrefix;
+    startIndex += length;
 
-    // Create a new bloom filter of size in bits and number of hash functions and store the filter content
-    const currentFilter = new BloomFilter(filterContent.length * 8, 1);
-    // Buckets is of type Int32Array, so we have to convert the buffer back to Int32Array
+    // Create a new bloom filter with the original size
+    const currentFilter = new BloomFilter(m, 1);
+    
+    // Set the buckets from the buffer
     currentFilter.buckets = new Int32Array(
       filterContent.buffer,
       filterContent.byteOffset,
       filterContent.byteLength / Int32Array.BYTES_PER_ELEMENT
     );
+    
     bloomFilters.push(currentFilter);
   }
+  
   return [bloomFilters, salt];
 }

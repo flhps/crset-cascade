@@ -36,9 +36,6 @@
     "test": "jest",
     "prepare": "npm run build"
   },
-  "dependencies": {
-    "bloomfilter": "github:jfelixh/bloomfilter-sha256"
-  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-json": "^6.1.0",
