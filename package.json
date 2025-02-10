@@ -37,8 +37,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "bloomfilter": "github:jfelixh/bloomfilter-sha256",
-    "hex-to-bin": "^1.0.1"
+    "bloomfilter": "github:jfelixh/bloomfilter-sha256"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.2",

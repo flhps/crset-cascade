@@ -1,5 +1,4 @@
 import { randomBytes } from "crypto";
-import hex2Bin from "hex-to-bin";
 
 /**
  * Generates a random 256-bit binary string.
@@ -18,6 +17,32 @@ export function generateRandom256BitString(): string {
 }
 
 /**
+ * Converts a hexadecimal string to its binary representation
+ * 
+ * @param hex - The hexadecimal string to convert (with or without '0x' prefix)
+ * @returns The binary string representation
+ */
+export function hexToBinary(hex: string): string {
+  // Remove '0x' prefix if present
+  const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex;
+  
+  // Map of hex digits to their 4-bit binary representations
+  const hexToBinMap: { [key: string]: string } = {
+    '0': '0000', '1': '0001', '2': '0010', '3': '0011',
+    '4': '0100', '5': '0101', '6': '0110', '7': '0111',
+    '8': '1000', '9': '1001', 'a': '1010', 'b': '1011',
+    'c': '1100', 'd': '1101', 'e': '1110', 'f': '1111',
+    'A': '1010', 'B': '1011', 'C': '1100', 'D': '1101',
+    'E': '1110', 'F': '1111'
+  };
+
+  return cleanHex
+    .split('')
+    .map(char => hexToBinMap[char] || '0000')
+    .join('');
+}
+
+/**
  * Converts a set of hexadecimal strings to a set of binary strings.
  *
  * @param {Set<string>} set - The set of hexadecimal strings to be converted.
@@ -25,9 +50,8 @@ export function generateRandom256BitString(): string {
  */
 export function convertSetToBinary(set: Set<string>): Set<string> {
   const resultSet = new Set<string>();
-  // Using hex2Bin to ensure precise conversion of large hexadecimal numbers to binary.
   set.forEach((id) => {
-    resultSet.add(hex2Bin(id));
+    resultSet.add(hexToBinary(id));
   });
   return resultSet;
 }

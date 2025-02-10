@@ -1,10 +1,10 @@
-import hex2Bin from "hex-to-bin";
 import { BloomFilter } from "bloomfilter";
 import {
   binaryStringToBuffer,
   convertSetToBinary,
   drawNFromSet,
   generateRandom256BitString,
+  hexToBinary,
 } from "../utils";
 
 /**
@@ -44,7 +44,7 @@ export function constructBFC(
   drawNFromSet(validIds, revokedIds, neededR, true);
   drawNFromSet(validIds, revokedIds, neededS, false);
 
-  const salted = generateRandom256BitString();
+  const salt = generateRandom256BitString();
 
   const pb = 0.5;
   const pa = Math.sqrt(0.5) / 2;
@@ -61,7 +61,7 @@ export function constructBFC(
     const currentFilter = new BloomFilter(sizeInBit, 1);
     includedSet.forEach((id) => {
       currentFilter.add(
-        id + cascadeLevel.toString(2).padStart(8, "0") + salted
+        id + cascadeLevel.toString(2).padStart(8, "0") + salt
       ); //we interprete cascadeLevel as 8bit
     });
     filter.push(currentFilter);
@@ -69,7 +69,7 @@ export function constructBFC(
     excludedSet.forEach((id) => {
       if (
         currentFilter.test(
-          id + cascadeLevel.toString(2).padStart(8, "0") + salted
+          id + cascadeLevel.toString(2).padStart(8, "0") + salt
         )
       ) {
         falsePositives.add(id);
@@ -79,7 +79,7 @@ export function constructBFC(
     includedSet = falsePositives;
     cascadeLevel++;
   }
-  return [filter, salted];
+  return [filter, salt];
 }
 
 /**
@@ -87,20 +87,20 @@ export function constructBFC(
  *
  * @param value - The value to check in the BFC.
  * @param bfc - An array of BloomFilter objects representing the cascade.
- * @param salted - A salted string used in the Bloom Filter test.
+ * @param salt - A salted string used in the Bloom Filter test.
  * @returns `true` if the value is in the BFC, `false` otherwise.
  */
 export function isInBFC(
   value: string,
   bfc: BloomFilter[],
-  salted: string
+  salt: string
 ): boolean {
   let cascadeLevel = 0;
-  let id = hex2Bin(value);
+  let id = hexToBinary(value);
   for (let i = 0; i < bfc.length; i++) {
     cascadeLevel++;
     if (
-      !bfc[i]?.test(id + cascadeLevel.toString(2).padStart(8, "0") + salted)
+      !bfc[i]?.test(id + cascadeLevel.toString(2).padStart(8, "0") + salt)
     ) {
       return cascadeLevel % 2 === 0;
     }
