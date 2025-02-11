@@ -1,20 +1,20 @@
 {
-  "name": "padded-bloom-filter-cascade",
+  "name": "crset-cascade",
   "version": "0.0.1",
   "license": "MIT",
-  "description": "Padded Bloom Filter Cascade implementation based on bloomfilter-sha256.",
+  "description": "Implementation of a padded bloom filter cascade for CRSet.",
   "type": "module",
   "keywords": [
     "bloom filter cascade"
   ],
-  "homepage": "https://github.com/jfelixh/padded-bloom-filter-cascade",
+  "homepage": "https://github.com/jfelixh/crset-cascade",
   "author": {
     "name": "Felix Hoops",
     "url": "https://github.com/jfelixh"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jfelixh/padded-bloom-filter-cascade.git"
+    "url": "https://github.com/jfelixh/crset-cascade.git"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

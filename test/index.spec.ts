@@ -1,4 +1,3 @@
-import { BloomFilter } from "bloomfilter";
 import {
   constructBFC,
   convertSetToBinary,
@@ -38,7 +37,7 @@ for (let i = 1000; i <= 3000; i++) {
   }
   invalidTestSet.add(randomHex); // Convert each number to a string and add it to the Set
 }
-const result = constructBFC(validTestSet, invalidTestSet, 1001);
+const result = constructBFC(validTestSet, invalidTestSet, 2000);
 
 test("convert set to binary", () => {
   const resultSet = new Set([
@@ -138,7 +137,7 @@ test("if the invalid VC is in the BLoomfilter with the correct implementation of
   });
 });
 
-test("serialized the bloomfilter correctly", () => {
+test("serialized the Bloomfilter correctly", () => {
   const deserializedResult = fromDataHexString(toDataHexString(result));
   
   // Test that both filters behave the same way
@@ -166,7 +165,7 @@ test("serialized the bloomfilter correctly", () => {
   }
 });
 
-test("see if serialized deserialized bloomfilter works properly", () => {
+test("see if serialized deserialized Bloomfilter works properly", () => {
   const deserializedResult = fromDataHexString(toDataHexString(result));
   validTestSet.forEach((id) => {
     expect(isInBFC(id, deserializedResult[0], deserializedResult[1])).toBe(

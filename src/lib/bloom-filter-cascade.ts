@@ -31,6 +31,7 @@ export function constructBFC(
   rHat: number
 ): [BloomFilter[], string] {
   if (validIds?.size > rHat || revokedIds?.size > 2 * rHat) {
+    //TODO more descriptive error message
     console.log("Error: Requirements not fulfilled. Returning empty array");
     return [[], "0"];
   }
@@ -57,12 +58,11 @@ export function constructBFC(
     const sizeInBit =
       (-1.0 * includedSet.size * Math.log(cascadeLevel === 1 ? pa : pb)) /
       (Math.log(2) * Math.log(2));
-    console.log(sizeInBit);
     const currentFilter = new BloomFilter(sizeInBit, 1);
     includedSet.forEach((id) => {
       currentFilter.add(
         id + cascadeLevel.toString(2).padStart(8, "0") + salt
-      ); //we interprete cascadeLevel as 8bit
+      );
     });
     filter.push(currentFilter);
     let falsePositives = new Set<string>();

@@ -48,6 +48,7 @@ export class BloomFilter {
   /**
    * Sets the underlying buckets array
    */
+  //TODO is the name buckets best?
   set buckets(newBuckets: Int32Array) {
     this.bits = newBuckets;
   }
@@ -60,6 +61,7 @@ export class BloomFilter {
   private getHashPositions(element: string): number[] {
     const positions: number[] = [];
     const hash = createHash('sha256').update(element).digest();
+    //TODO can we optimize this by making hash a class variable?
     
     // Use different sections of the SHA-256 hash for each hash function
     for (let i = 0; i < this.k; i++) {
