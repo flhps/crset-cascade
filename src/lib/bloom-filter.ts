@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 export class BloomFilter {
   private bits: Int32Array;
@@ -35,20 +35,19 @@ export class BloomFilter {
    */
   test(element: string): boolean {
     const positions = this.getHashPositions(element);
-    return positions.every(pos => this.getBit(pos));
+    return positions.every((pos) => this.getBit(pos));
   }
 
   /**
-   * Gets the underlying buckets array
+   * Gets the underlying bit bucket array
    */
   get buckets(): Int32Array {
     return this.bits;
   }
 
   /**
-   * Sets the underlying buckets array
+   * Sets the underlying bit bucket array
    */
-  //TODO is the name buckets best?
   set buckets(newBuckets: Int32Array) {
     this.bits = newBuckets;
   }
@@ -60,16 +59,15 @@ export class BloomFilter {
    */
   private getHashPositions(element: string): number[] {
     const positions: number[] = [];
-    const hash = createHash('sha256').update(element).digest();
-    //TODO can we optimize this by making hash a class variable?
-    
+    const hash = createHash("sha256").update(element).digest();
+
     // Use different sections of the SHA-256 hash for each hash function
     for (let i = 0; i < this.k; i++) {
       // Use 4 bytes (32 bits) for each hash value
-      const value = hash.readUInt32BE(i * 4 % (hash.length - 3));
+      const value = hash.readUInt32BE((i * 4) % (hash.length - 3));
       positions.push(value % this.m);
     }
-    
+
     return positions;
   }
 
@@ -93,4 +91,4 @@ export class BloomFilter {
     const bitPos = pos % 32;
     return (this.bits[bucketPos] & (1 << bitPos)) !== 0;
   }
-} 
+}

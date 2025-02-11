@@ -18,28 +18,44 @@ export function generateRandom256BitString(): string {
 
 /**
  * Converts a hexadecimal string to its binary representation
- * 
+ *
  * @param hex - The hexadecimal string to convert (with or without '0x' prefix)
  * @returns The binary string representation
  */
 export function hexToBinary(hex: string): string {
   // Remove '0x' prefix if present
-  const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex;
-  
+  const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+
   // Map of hex digits to their 4-bit binary representations
   const hexToBinMap: { [key: string]: string } = {
-    '0': '0000', '1': '0001', '2': '0010', '3': '0011',
-    '4': '0100', '5': '0101', '6': '0110', '7': '0111',
-    '8': '1000', '9': '1001', 'a': '1010', 'b': '1011',
-    'c': '1100', 'd': '1101', 'e': '1110', 'f': '1111',
-    'A': '1010', 'B': '1011', 'C': '1100', 'D': '1101',
-    'E': '1110', 'F': '1111'
+    "0": "0000",
+    "1": "0001",
+    "2": "0010",
+    "3": "0011",
+    "4": "0100",
+    "5": "0101",
+    "6": "0110",
+    "7": "0111",
+    "8": "1000",
+    "9": "1001",
+    a: "1010",
+    b: "1011",
+    c: "1100",
+    d: "1101",
+    e: "1110",
+    f: "1111",
+    A: "1010",
+    B: "1011",
+    C: "1100",
+    D: "1101",
+    E: "1110",
+    F: "1111",
   };
 
   return cleanHex
-    .split('')
-    .map(char => hexToBinMap[char] || '0000')
-    .join('');
+    .split("")
+    .map((char) => hexToBinMap[char] || "0000")
+    .join("");
 }
 
 /**
@@ -68,7 +84,7 @@ export function drawNFromSet(
   validIds: Set<string>,
   revokedIds: Set<string>,
   neededIteration: number,
-  addToValidIds: boolean
+  addToValidIds: boolean,
 ) {
   for (let i = 0; i < neededIteration; ) {
     const randomId = generateRandom256BitString();
@@ -95,7 +111,7 @@ export function binaryStringToBuffer(binaryString: string): Buffer {
   // Add padding to binary string if necessary
   const paddedBinaryString = binaryString.padStart(
     Math.ceil(binaryString.length / 8) * 8,
-    "0"
+    "0",
   );
 
   // Convert every 8 bits into a byte (number)
