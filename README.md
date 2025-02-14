@@ -18,7 +18,7 @@ import {
   fromDataHexString,
   isInBFC,
   toDataHexString,
-} from "padded-bloom-filter-cascade";
+} from "crset-cascade";
 
 const element: string = "..."; // Element to check later on if it is in the CRSet cascade
 

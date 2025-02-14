@@ -5,7 +5,7 @@
   "description": "Implementation of a padded bloom filter cascade for CRSet.",
   "type": "module",
   "keywords": [
-    "bloom filter cascade"
+    "crset bloom filter cascade"
   ],
   "homepage": "https://github.com/jfelixh/crset-cascade",
   "author": {
