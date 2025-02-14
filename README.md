@@ -1,49 +1,50 @@
-# padded-bloom-filter-cascade
+# CRSet Cascade
 
-This project implements a padded Bloom Filter Cascade, based on the [*bloomfilter-sha256*](https://github.com/jfelixh/bloomfilter-sha256) library. It provides utility functions to construct, reconstruct, and verify the presence of elements within the padded Bloom Filter Cascade.
+This project implements a padded Bloom filter cascade based on `sha256`. It provides utility functions to construct, reconstruct, and verify the presence of elements within the padded Bloom filter cascade. It is intended as a library for the CRSet revocation mechanism for Verifiable Credentials.
 
 ## Usage
-To use the padded Bloom Filter Cascade, install the package via npm:
-```
-npm install 
+
+This package can be installed directly from the repository:
+
+```bash
+npm install github:jfelixh/crset-cascade
 ```
 
 Then, in your project, import the necessary functions and use them as follows:
 
 ```typescript
-import { constructBFC, fromDataHexString, isInBFC, toDataHexString } from 'padded-bloom-filter-cascade';
+import {
+  constructBFC,
+  fromDataHexString,
+  isInBFC,
+  toDataHexString,
+} from "crset-cascade";
 
-const element: string = '...'; // Element to check later on if it is in the Bloom Filter Cascade
+const element: string = "..."; // Element to check later on if it is in the CRSet cascade
 
-// Construct a Bloom Filter Cascade
-const validElements: Set<string> = new Set([element, '...', '...']); // Set of valid elements
-const invalidElements: Set<string> = new Set(['...', '...', '...']); // Set of invalid elements
-const rHat: number = x // Padding size x, where rHat >= |validElements|
+// Construct a CRSet cascade
+const validElements: Set<string> = new Set([element, "...", "..."]); // Set of valid elements
+const invalidElements: Set<string> = new Set(["...", "...", "..."]); // Set of invalid elements
+const rHat: number = x; // Padding size x, where rHat >= |validElements|
 const constructedBFC = constructBFC(validElements, invalidElements, rHat); // returns [filter, salt]
 
-console.log(constructedBFC[0]); // Constructed Bloom Filter Cascade
+// Check if an element is in the CRSet cascade
+const filterHexString = toDataHexString(constructedBFC); // Hexadecimal string representing the CRSet cascade
+const [filter, salt] = fromDataHexString(filterHexString); // Reconstruct the CRSet cascade from the hexadecimal string
 
-// Check if an element is in the Bloom Filter Cascade
-const filterHexString = toDataHexString(constructedBFC); // Hexadecimal string representing the Bloom Filter Cascade
-const [filter, salt] = fromDataHexString(filterHexString); // Reconstruct the Bloom Filter Cascade from the hexadecimal string
-
-const result = isInBFC(filter, salt, element);
-
-console.log(result); // true if the element is in the Bloom Filter Cascade, false otherwise
+const result = isInBFC(filter, salt, element); // true if the element is in the CRSet cascade, false otherwise
 ```
 
 ## Testing
-To verify that the Bloom Filter implementation works as expected, run the following command in the root directory:
-```
+
+To verify that this implementation works as expected, run the following command in the root directory:
+
+```bash
 npm test
 ```
 
 ## Links and References
-- ![arXiv](https://img.shields.io/badge/arXiv-2501.17089-b31b1b.svg) 
+
+- ![arXiv](https://img.shields.io/badge/arXiv-2501.17089-b31b1b.svg)
   **[CRSet: Non-Interactive Verifiable Credential Revocation with Metadata Privacy for Issuers and Everyone Else](https://arxiv.org/abs/2501.17089)**  
-  *Hoops et al., 2025.*  
-- [![IEEE Xplore](https://img.shields.io/badge/IEEE%20Xplore-7958597-blue)](https://ieeexplore.ieee.org/document/7958597) 
-**[CRLite: A Scalable System for Pushing All TLS Revocations to All Browsers](https://ieeexplore.ieee.org/document/7958597)**
-*Larisch et al., 2025.* 
-- ![GitHub](https://img.shields.io/badge/GitHub-bloomfilter--sha256-blue?logo=github)
-    **[bloomfilter-sha256](https://github.com/jfelixh/bloomfilter-sha256)**
+  _Hoops et al., 2025._

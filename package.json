@@ -1,20 +1,20 @@
 {
-  "name": "padded-bloom-filter-cascade",
+  "name": "crset-cascade",
   "version": "0.0.1",
   "license": "MIT",
-  "description": "Padded Bloom Filter Cascade implementation based on bloomfilter-sha256.",
+  "description": "Implementation of a padded bloom filter cascade for CRSet.",
   "type": "module",
   "keywords": [
-    "bloom filter cascade"
+    "crset bloom filter cascade"
   ],
-  "homepage": "https://github.com/jfelixh/padded-bloom-filter-cascade",
+  "homepage": "https://github.com/jfelixh/crset-cascade",
   "author": {
     "name": "Felix Hoops",
     "url": "https://github.com/jfelixh"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jfelixh/padded-bloom-filter-cascade.git"
+    "url": "https://github.com/jfelixh/crset-cascade.git"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,10 +36,6 @@
     "test": "jest",
     "prepare": "npm run build"
   },
-  "dependencies": {
-    "bloomfilter": "github:jfelixh/bloomfilter-sha256",
-    "hex-to-bin": "^1.0.1"
-  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-json": "^6.1.0",
@@ -50,6 +46,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.9.0",
     "jest": "^29.7.0",
+    "prettier": "^3.5.1",
     "rimraf": "^5.0.0",
     "rollup": "^4.31.0",
     "rollup-plugin-dts": "^6.1.1",

@@ -1,4 +1,3 @@
-import { BloomFilter } from "bloomfilter";
 import {
   constructBFC,
   convertSetToBinary,
@@ -38,7 +37,7 @@ for (let i = 1000; i <= 3000; i++) {
   }
   invalidTestSet.add(randomHex); // Convert each number to a string and add it to the Set
 }
-const result = constructBFC(validTestSet, invalidTestSet, 1001);
+const result = constructBFC(validTestSet, invalidTestSet, 2000);
 
 test("convert set to binary", () => {
   const resultSet = new Set([
@@ -47,7 +46,7 @@ test("convert set to binary", () => {
   const binarySet = convertSetToBinary(resultSet);
   expect(binarySet.size).toBe(1);
   expect(binarySet.values().next().value).toBe(
-    "0110000000101011010010110010101110000001111100000110001111010000011100010000011101110111001010110111001101011000000100001110001000111000000000000111110110000100110111110111000110111010111110011010110100110111111111100101100010110100110110101111111100111000"
+    "0110000000101011010010110010101110000001111100000110001111010000011100010000011101110111001010110111001101011000000100001110001000111000000000000111110110000100110111110111000110111010111110011010110100110111111111100101100010110100110110101111111100111000",
   );
 });
 
@@ -81,8 +80,8 @@ test("if second layer of bloom filter is implemented correctly", () => {
     let cascadeLevel = 2;
     expect(
       secondLayer?.test(
-        id + cascadeLevel.toString(2).padStart(8, "0") + result[1]
-      )
+        id + cascadeLevel.toString(2).padStart(8, "0") + result[1],
+      ),
     ).toBe(true);
   });
 });
@@ -119,10 +118,10 @@ test("checkRequirements", () => {
     }
     invalidTestSets.add(randomHex); // Convert each number to a string and add it to the Set
   }
-  const result = constructBFC(validTestSets, invalidTestSets, 800);
+  constructBFC(validTestSets, invalidTestSets, 800);
   // Check if the correct message was logged
   expect(consoleLogSpy).toHaveBeenCalledWith(
-    "Error: Requirements not fulfilled. Returning empty array"
+    "Error: The size paramter rHat is too small for the given data. Returning empty array",
   );
 });
 
@@ -138,28 +137,54 @@ test("if the invalid VC is in the BLoomfilter with the correct implementation of
   });
 });
 
-test("serialized the bloomfilter correctly", () => {
+test("serialized the Bloomfilter correctly", () => {
   const deserializedResult = fromDataHexString(toDataHexString(result));
-  for (let i = 0; i < deserializedResult[0].length; i++) {
-    (deserializedResult[0][i] as BloomFilter)._locations = (
-      result[0][i] as BloomFilter
-    )._locations;
-  }
+
+  // Test that both filters behave the same way
+  validTestSet.forEach((id) => {
+    const originalResult = isInBFC(id, result[0], result[1]);
+    const deserializedResultValue = isInBFC(
+      id,
+      deserializedResult[0],
+      deserializedResult[1],
+    );
+    expect(originalResult).toBe(deserializedResultValue);
+  });
+
+  invalidTestSet.forEach((id) => {
+    const originalResult = isInBFC(id, result[0], result[1]);
+    const deserializedResultValue = isInBFC(
+      id,
+      deserializedResult[0],
+      deserializedResult[1],
+    );
+    expect(originalResult).toBe(deserializedResultValue);
+  });
+
+  // Compare salt strings
   expect(result[1]).toStrictEqual(deserializedResult[1]);
-  expect(result[0]).toStrictEqual(deserializedResult[0]);
-  expect(result).toStrictEqual(deserializedResult);
+
+  // Compare lengths
+  expect(result[0].length).toStrictEqual(deserializedResult[0].length);
+
+  // Compare the actual bit arrays of each filter
+  for (let i = 0; i < result[0].length; i++) {
+    expect(result[0][i].buckets).toStrictEqual(
+      deserializedResult[0][i].buckets,
+    );
+  }
 });
 
-test("see if serialized deserialized bloomfilter works properly", () => {
+test("see if serialized deserialized Bloomfilter works properly", () => {
   const deserializedResult = fromDataHexString(toDataHexString(result));
   validTestSet.forEach((id) => {
     expect(isInBFC(id, deserializedResult[0], deserializedResult[1])).toBe(
-      true
+      true,
     );
   });
   for (const id of invalidTestSet) {
     expect(isInBFC(id, deserializedResult[0], deserializedResult[1])).toBe(
-      false
+      false,
     );
   }
 });

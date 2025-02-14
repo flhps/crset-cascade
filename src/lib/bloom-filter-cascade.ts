@@ -1,10 +1,10 @@
-import hex2Bin from "hex-to-bin";
-import { BloomFilter } from "bloomfilter";
+import { BloomFilter } from "./bloom-filter";
 import {
   binaryStringToBuffer,
   convertSetToBinary,
   drawNFromSet,
   generateRandom256BitString,
+  hexToBinary,
 } from "../utils";
 
 /**
@@ -28,10 +28,12 @@ import {
 export function constructBFC(
   validIds: Set<string>,
   revokedIds: Set<string>,
-  rHat: number
+  rHat: number,
 ): [BloomFilter[], string] {
   if (validIds?.size > rHat || revokedIds?.size > 2 * rHat) {
-    console.log("Error: Requirements not fulfilled. Returning empty array");
+    console.log(
+      "Error: The size paramter rHat is too small for the given data. Returning empty array",
+    );
     return [[], "0"];
   }
   const sHat = 2 * rHat;
@@ -44,7 +46,7 @@ export function constructBFC(
   drawNFromSet(validIds, revokedIds, neededR, true);
   drawNFromSet(validIds, revokedIds, neededS, false);
 
-  const salted = generateRandom256BitString();
+  const salt = generateRandom256BitString();
 
   const pb = 0.5;
   const pa = Math.sqrt(0.5) / 2;
@@ -57,19 +59,16 @@ export function constructBFC(
     const sizeInBit =
       (-1.0 * includedSet.size * Math.log(cascadeLevel === 1 ? pa : pb)) /
       (Math.log(2) * Math.log(2));
-    console.log(sizeInBit);
     const currentFilter = new BloomFilter(sizeInBit, 1);
     includedSet.forEach((id) => {
-      currentFilter.add(
-        id + cascadeLevel.toString(2).padStart(8, "0") + salted
-      ); //we interprete cascadeLevel as 8bit
+      currentFilter.add(id + cascadeLevel.toString(2).padStart(8, "0") + salt);
     });
     filter.push(currentFilter);
     let falsePositives = new Set<string>();
     excludedSet.forEach((id) => {
       if (
         currentFilter.test(
-          id + cascadeLevel.toString(2).padStart(8, "0") + salted
+          id + cascadeLevel.toString(2).padStart(8, "0") + salt,
         )
       ) {
         falsePositives.add(id);
@@ -79,7 +78,7 @@ export function constructBFC(
     includedSet = falsePositives;
     cascadeLevel++;
   }
-  return [filter, salted];
+  return [filter, salt];
 }
 
 /**
@@ -87,21 +86,19 @@ export function constructBFC(
  *
  * @param value - The value to check in the BFC.
  * @param bfc - An array of BloomFilter objects representing the cascade.
- * @param salted - A salted string used in the Bloom Filter test.
+ * @param salt - A salted string used in the Bloom Filter test.
  * @returns `true` if the value is in the BFC, `false` otherwise.
  */
 export function isInBFC(
   value: string,
   bfc: BloomFilter[],
-  salted: string
+  salt: string,
 ): boolean {
   let cascadeLevel = 0;
-  let id = hex2Bin(value);
+  let id = hexToBinary(value);
   for (let i = 0; i < bfc.length; i++) {
     cascadeLevel++;
-    if (
-      !bfc[i]?.test(id + cascadeLevel.toString(2).padStart(8, "0") + salted)
-    ) {
+    if (!bfc[i]?.test(id + cascadeLevel.toString(2).padStart(8, "0") + salt)) {
       return cascadeLevel % 2 === 0;
     }
   }
@@ -122,31 +119,36 @@ export function isInBFC(
  */
 export function toDataHexString(bfc: [BloomFilter[], string]): string {
   const serializedCascade = bfc[0].map((filter) => {
-    // Serialization from npm documentation
-    var array = [].slice.call(filter.buckets);
+    // Create a buffer from the filter's buckets
+    const buffer = Buffer.from(
+      filter.buckets.buffer,
+      filter.buckets.byteOffset,
+      filter.buckets.byteLength,
+    );
 
-    // Create and fill the buffer with the filter content
-    const buffer =
-      filter.buckets instanceof Int32Array ? filter.buckets.buffer : null;
-    const currentFilterBuffer = Buffer.from(buffer!);
-
-    // Allocate 4 Bytes for lengthPrefix. The more items we have, the bigger the length would be
+    // Allocate 4 bytes for length prefix
     const lengthPrefix = Buffer.alloc(4);
-    lengthPrefix.writeUInt32BE(currentFilterBuffer.length, 0); // Store the length in the Buffer using big endian
-    // For each filter concatinate the filter itself with its length
-    return Buffer.concat([lengthPrefix, currentFilterBuffer]);
+    lengthPrefix.writeUInt32BE(buffer.length, 0);
+
+    // Also store the size of the filter (m) as this is needed for reconstruction
+    const sizePrefix = Buffer.alloc(4);
+    sizePrefix.writeUInt32BE(filter["m"], 0);
+
+    return Buffer.concat([lengthPrefix, sizePrefix, buffer]);
   });
 
   // Create a Buffer to store the salt
   const serializedSalt = binaryStringToBuffer(bfc[1]);
+
   // Create a Buffer from the array of Buffers
   const serializedCascadeBuffer = Buffer.concat(serializedCascade);
-  // Concatinate the salt and the buffer of filterCascade
+
+  // Concatenate the salt and the buffer of filterCascade
   const serializedArray = Buffer.concat([
     serializedSalt,
     serializedCascadeBuffer,
   ]);
-  // Return a string hex value
+
   return `0x${serializedArray.toString("hex")}`;
 }
 
@@ -169,7 +171,7 @@ export function toDataHexString(bfc: [BloomFilter[], string]): string {
  * 6. Returns the array of BloomFilter objects and the salt string.
  */
 export function fromDataHexString(serialized: string): [BloomFilter[], string] {
-  // Create a buffer from the string hex value by first removing 0x
+  // Create a buffer from the hex string
   const buffer = Buffer.from(serialized.slice(2), "hex");
 
   // Extract the salt - the first 32 bytes
@@ -183,25 +185,29 @@ export function fromDataHexString(serialized: string): [BloomFilter[], string] {
   let startIndex = 32;
   while (startIndex < buffer.length) {
     // Read the length which takes 4 bytes
-    const lengthPrefix = buffer.readUInt32BE(startIndex);
+    const length = buffer.readUInt32BE(startIndex);
+    startIndex += 4;
+
+    // Read the filter size (m) which takes 4 bytes
+    const m = buffer.readUInt32BE(startIndex);
     startIndex += 4;
 
     // Read the Bloom filter content
-    const filterContent = buffer.subarray(
-      startIndex,
-      startIndex + lengthPrefix
-    );
-    startIndex += lengthPrefix;
+    const filterContent = buffer.subarray(startIndex, startIndex + length);
+    startIndex += length;
 
-    // Create a new bloom filter of size in bits and number of hash functions and store the filter content
-    const currentFilter = new BloomFilter(filterContent.length * 8, 1);
-    // Buckets is of type Int32Array, so we have to convert the buffer back to Int32Array
+    // Create a new bloom filter with the original size
+    const currentFilter = new BloomFilter(m, 1);
+
+    // Set the buckets from the buffer
     currentFilter.buckets = new Int32Array(
       filterContent.buffer,
       filterContent.byteOffset,
-      filterContent.byteLength / Int32Array.BYTES_PER_ELEMENT
+      filterContent.byteLength / Int32Array.BYTES_PER_ELEMENT,
     );
+
     bloomFilters.push(currentFilter);
   }
+
   return [bloomFilters, salt];
 }
