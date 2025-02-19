@@ -1,6 +1,6 @@
 {
   "name": "crset-cascade",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "MIT",
   "description": "Implementation of a padded bloom filter cascade for CRSet.",
   "type": "module",
@@ -16,17 +16,18 @@
     "type": "git",
     "url": "https://github.com/jfelixh/crset-cascade.git"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
   "files": [
     "dist"
   ],
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/esm/index.js"
     }
   },
   "scripts": {
