@@ -191,6 +191,11 @@ export function fromDataHexString(serialized: string): [BloomFilter[], string] {
     const length = buffer.readUInt32BE(startIndex);
     startIndex += 4;
 
+    // If length is zero, these are just trailing zero bytes
+    if (length == 0) {
+      break;
+    }
+
     // Read the filter size (m) which takes 4 bytes
     const m = buffer.readUInt32BE(startIndex);
     startIndex += 4;
