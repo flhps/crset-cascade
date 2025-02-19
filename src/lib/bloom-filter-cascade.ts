@@ -31,10 +31,9 @@ export function constructBFC(
   rHat: number,
 ): [BloomFilter[], string] {
   if (validIds?.size > rHat || revokedIds?.size > 2 * rHat) {
-    console.log(
-      "Error: The size paramter rHat is too small for the given data. Returning empty array",
+    throw new RangeError(
+      `The size paramter rHat=${rHat} is too small for the given data ${validIds?.size} and ${revokedIds?.size}`,
     );
-    return [[], "0"];
   }
   const sHat = 2 * rHat;
   const neededR = rHat - validIds?.size;
@@ -171,6 +170,10 @@ export function toDataHexString(bfc: [BloomFilter[], string]): string {
  * 6. Returns the array of BloomFilter objects and the salt string.
  */
 export function fromDataHexString(serialized: string): [BloomFilter[], string] {
+  if (!serialized?.startsWith("0x")) {
+    throw new Error("Invalid hex string format: must start with 0x");
+  }
+
   // Create a buffer from the hex string
   const buffer = Buffer.from(serialized.slice(2), "hex");
 

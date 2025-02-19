@@ -86,8 +86,7 @@ test("if second layer of bloom filter is implemented correctly", () => {
   });
 });
 
-test("checkRequirements", () => {
-  const consoleLogSpy = jest.spyOn(console, "log");
+test("enforce rHat minimum depending on input data", () => {
   let validTestSets = new Set<string>();
   for (let i = 1; i <= 1000; i++) {
     let randomHex = "";
@@ -100,28 +99,24 @@ test("checkRequirements", () => {
         .padStart(8, "0");
       randomHex += segment;
     }
-    validTestSets.add(randomHex); // Convert each number to a string and add it to the Set
+    validTestSets.add(randomHex);
   }
+
   let invalidTestSets = new Set<string>();
   for (let i = 1000; i <= 3000; i++) {
-    const hexLength = 64; // Desired length of each hex value
-
+    const hexLength = 64;
     let randomHex = "";
-
-    // Generate a 64-character (32-byte) hex value
     for (let i = 0; i < hexLength / 8; i++) {
-      // Generate a random 8-character hex segment
       const segment = Math.floor(Math.random() * 0xffffffff)
         .toString(16)
         .padStart(8, "0");
       randomHex += segment;
     }
-    invalidTestSets.add(randomHex); // Convert each number to a string and add it to the Set
+    invalidTestSets.add(randomHex);
   }
-  constructBFC(validTestSets, invalidTestSets, 800);
-  // Check if the correct message was logged
-  expect(consoleLogSpy).toHaveBeenCalledWith(
-    "Error: The size paramter rHat is too small for the given data. Returning empty array",
+
+  expect(() => constructBFC(validTestSets, invalidTestSets, 800)).toThrow(
+    RangeError,
   );
 });
 
