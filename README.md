@@ -2,8 +2,8 @@
 
 This project implements a padded Bloom filter cascade based on `sha256`. It provides utility functions to construct, reconstruct, and verify the presence of elements within the padded Bloom filter cascade. It is intended as a library for the CRSet revocation mechanism for Verifiable Credentials. Instead of using this library directly, consider using the respective higher-level ones for issuers and verifiers:
 
-- ![GitHub](https://img.shields.io/badge/GitHub-crset--issuer--backend-blue?logo=github) [CRSet Issuer](https://github.com/jfelixh/crset-issuer-backend)
-- ![GitHub](https://img.shields.io/badge/GitHub-crset--check-blue?logo=github) [CRSet Check](https://github.com/jfelixh/crset-check)
+- ![GitHub](https://img.shields.io/badge/GitHub-crset--issuer--backend-blue?logo=github) [for issuers](https://github.com/jfelixh/crset-issuer-backend)
+- ![GitHub](https://img.shields.io/badge/GitHub-crset--check-blue?logo=github) [for verifiers](https://github.com/jfelixh/crset-check)
 
 ## Usage
 
