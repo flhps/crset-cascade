@@ -22,8 +22,6 @@ import {
  * 4. Generates a random 256-bit salted string.
  * 5. Constructs the Bloom Filter Cascade by iteratively creating Bloom Filters
  *    and testing for false positives.
- *
- * If the requirements are not fulfilled, it returns an empty array and a "0" string.
  */
 export function constructBFC(
   validIds: Set<string>,
@@ -52,7 +50,7 @@ export function constructBFC(
 
   let includedSet = validIds;
   let excludedSet = revokedIds;
-  let filter: BloomFilter[] = [];
+  const filter: BloomFilter[] = [];
   let cascadeLevel = 1;
   while (includedSet.size > 0) {
     const sizeInBit =
@@ -63,7 +61,7 @@ export function constructBFC(
       currentFilter.add(id + cascadeLevel.toString(2).padStart(8, "0") + salt);
     });
     filter.push(currentFilter);
-    let falsePositives = new Set<string>();
+    const falsePositives = new Set<string>();
     excludedSet.forEach((id) => {
       if (
         currentFilter.test(
@@ -94,7 +92,7 @@ export function isInBFC(
   salt: string,
 ): boolean {
   let cascadeLevel = 0;
-  let id = hexToBinary(value);
+  const id = hexToBinary(value);
   for (let i = 0; i < bfc.length; i++) {
     cascadeLevel++;
     if (!bfc[i]?.test(id + cascadeLevel.toString(2).padStart(8, "0") + salt)) {

@@ -6,7 +6,7 @@ import {
   toDataHexString,
 } from "../src";
 
-let validTestSet = new Set<string>();
+const validTestSet = new Set<string>();
 for (let i = 1; i <= 1000; i++) {
   let randomHex = "";
   const hexLength = 64;
@@ -21,7 +21,7 @@ for (let i = 1; i <= 1000; i++) {
   }
   validTestSet.add(randomHex); // Convert each number to a string and add it to the Set
 }
-let invalidTestSet = new Set<string>();
+const invalidTestSet = new Set<string>();
 for (let i = 1000; i <= 3000; i++) {
   const hexLength = 64; // Desired length of each hex value
 
@@ -56,7 +56,7 @@ test("if first layer of bloom filter is implemented correctly", () => {
   const validTestSetFirst: Set<string> = convertSetToBinary(validTestSet);
 
   validTestSetFirst.forEach((id) => {
-    let cascadeLevel = 1;
+    const cascadeLevel = 1;
     id = id + cascadeLevel.toString(2).padStart(8, "0") + result[1];
     expect(firstLayer?.test(id)).toBe(true);
     // expect(isInBFC(id,result[0],result[1])).toBe(true)
@@ -67,17 +67,17 @@ test("if second layer of bloom filter is implemented correctly", () => {
   const filter = result[0];
   const firstLayer = filter[0];
   const secondLayer = filter[1];
-  let invalidTestSetFirst: Set<string> = convertSetToBinary(invalidTestSet);
-  let falsePositives = new Set<string>();
+  const invalidTestSetFirst: Set<string> = convertSetToBinary(invalidTestSet);
+  const falsePositives = new Set<string>();
   invalidTestSetFirst.forEach((id) => {
-    let cascadeLevel = 1;
+    const cascadeLevel = 1;
     const id_test = id + cascadeLevel.toString(2).padStart(8, "0") + result[1];
     if (firstLayer?.test(id_test)) {
       falsePositives.add(id);
     }
   });
   falsePositives.forEach((id) => {
-    let cascadeLevel = 2;
+    const cascadeLevel = 2;
     expect(
       secondLayer?.test(
         id + cascadeLevel.toString(2).padStart(8, "0") + result[1],
@@ -87,7 +87,7 @@ test("if second layer of bloom filter is implemented correctly", () => {
 });
 
 test("enforce rHat minimum depending on input data", () => {
-  let validTestSets = new Set<string>();
+  const validTestSets = new Set<string>();
   for (let i = 1; i <= 1000; i++) {
     let randomHex = "";
     const hexLength = 64;
@@ -102,7 +102,7 @@ test("enforce rHat minimum depending on input data", () => {
     validTestSets.add(randomHex);
   }
 
-  let invalidTestSets = new Set<string>();
+  const invalidTestSets = new Set<string>();
   for (let i = 1000; i <= 3000; i++) {
     const hexLength = 64;
     let randomHex = "";
