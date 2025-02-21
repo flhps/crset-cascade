@@ -7,6 +7,50 @@ import {
   hexToBinary,
 } from "../utils";
 
+export default class CRSetCascade {
+  private readonly filters: BloomFilter[];
+  private readonly salt: string;
+
+  private constructor(filters: BloomFilter[], salt: string) {
+    this.filters = filters;
+    this.salt = salt;
+  }
+
+  public static fromSets(
+    validIds: Set<string>,
+    revokedIds: Set<string>,
+    rHat: number,
+  ) {
+    const [filters, salt] = constructBFC(validIds, revokedIds, rHat);
+    return new CRSetCascade(filters, salt);
+  }
+
+  public static fromDataHexString(serialized: string): CRSetCascade {
+    const [filters, salt] = fromDataHexString(serialized);
+    return new CRSetCascade(filters, salt);
+  }
+
+  public toDataHexString(): string {
+    return toDataHexString([this.filters, this.salt]);
+  }
+
+  public has(value: string): boolean {
+    return isInBFC(value, this.filters, this.salt);
+  }
+
+  public getDepth(): number {
+    return this.filters.length;
+  }
+
+  public getLayers(): BloomFilter[] {
+    return this.filters;
+  }
+
+  public getSalt(): string {
+    return this.salt;
+  }
+}
+
 /**
  * Constructs a Bloom Filter Cascade (BFC) from the given sets of valid and revoked IDs.
  *
@@ -23,7 +67,7 @@ import {
  * 5. Constructs the Bloom Filter Cascade by iteratively creating Bloom Filters
  *    and testing for false positives.
  */
-export function constructBFC(
+function constructBFC(
   validIds: Set<string>,
   revokedIds: Set<string>,
   rHat: number,
@@ -86,11 +130,7 @@ export function constructBFC(
  * @param salt - A salted string used in the Bloom Filter test.
  * @returns `true` if the value is in the BFC, `false` otherwise.
  */
-export function isInBFC(
-  value: string,
-  bfc: BloomFilter[],
-  salt: string,
-): boolean {
+function isInBFC(value: string, bfc: BloomFilter[], salt: string): boolean {
   let cascadeLevel = 0;
   const id = hexToBinary(value);
   for (let i = 0; i < bfc.length; i++) {
@@ -114,7 +154,7 @@ export function isInBFC(
  * 3. Concatenates the serialized BloomFilters and the salt buffer.
  * 4. Returns the concatenated buffer as a hexadecimal string prefixed with "0x".
  */
-export function toDataHexString(bfc: [BloomFilter[], string]): string {
+function toDataHexString(bfc: [BloomFilter[], string]): string {
   const serializedCascade = bfc[0].map((filter) => {
     // Create a buffer from the filter's buckets
     const buffer = Buffer.from(
@@ -167,7 +207,7 @@ export function toDataHexString(bfc: [BloomFilter[], string]): string {
  * 5. Creates a new BloomFilter object and sets its buckets from the filter content.
  * 6. Returns the array of BloomFilter objects and the salt string.
  */
-export function fromDataHexString(serialized: string): [BloomFilter[], string] {
+function fromDataHexString(serialized: string): [BloomFilter[], string] {
   if (!serialized?.startsWith("0x")) {
     throw new Error("Invalid hex string format: must start with 0x");
   }

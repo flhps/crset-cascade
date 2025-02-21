@@ -16,12 +16,7 @@ npm install github:jfelixh/crset-cascade
 Then, in your project, import the necessary functions and use them as follows:
 
 ```typescript
-import {
-  constructBFC,
-  fromDataHexString,
-  isInBFC,
-  toDataHexString,
-} from "crset-cascade";
+import CRSetCascade from "crset-cascade";
 
 const element: string = "..."; // Element to check later on if it is in the CRSet cascade
 
@@ -29,13 +24,23 @@ const element: string = "..."; // Element to check later on if it is in the CRSe
 const validElements: Set<string> = new Set([element, "...", "..."]); // Set of valid elements
 const invalidElements: Set<string> = new Set(["...", "...", "..."]); // Set of invalid elements
 const rHat: number = x; // Padding size x, where rHat >= |validElements|
-const constructedBFC = constructBFC(validElements, invalidElements, rHat); // returns [filter, salt]
+const constructedBFC = CRSetCascade.fromSets(
+  validElements,
+  invalidElements,
+  rHat,
+);
 
 // Check if an element is in the CRSet cascade
-const filterHexString = toDataHexString(constructedBFC); // Hexadecimal string representing the CRSet cascade
-const [filter, salt] = fromDataHexString(filterHexString); // Reconstruct the CRSet cascade from the hexadecimal string
+const result = constructedBFC.has(element); // true if the element is in the CRSet cascade, false otherwise
 
-const result = isInBFC(filter, salt, element); // true if the element is in the CRSet cascade, false otherwise
+// Serialize and deserialize the CRSet cascade
+const filterHexString = constructedBFC.toDataHexString(); // Hexadecimal string representing the CRSet cascade
+const [filter, salt] = CRSetCascade.fromDataHexString(filterHexString); // Reconstruct the CRSet cascade from the hexadecimal string
+
+// Get information about the CRSet cascade
+const depth = constructedBFC.getDepth(); // number of layers in the CRSet cascade
+const layers = constructedBFC.getLayers(); // array of Bloom filters
+const salt = constructedBFC.getSalt(); // salt used to construct the CRSet cascade
 ```
 
 ## Testing
