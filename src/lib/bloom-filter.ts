@@ -13,7 +13,6 @@ export class BloomFilter {
   constructor(m: number, k: number = 1) {
     this.m = Math.ceil(m);
     this.k = k;
-    // Initialize bit array (Int32Array length needs to be ceil(m/32))
     this.bits = new Int32Array(Math.ceil(this.m / 32));
   }
 

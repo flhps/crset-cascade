@@ -1,77 +1,34 @@
-import {
-  constructBFC,
-  convertSetToBinary,
-  fromDataHexString,
-  isInBFC,
-  toDataHexString,
-} from "../src";
+import { CRSetCascade } from "../src/lib/bloom-filter-cascade";
+import { addUniqueRandomIdsToSet } from "../src/utils";
 
 const validTestSet = new Set<string>();
-for (let i = 1; i <= 1000; i++) {
-  let randomHex = "";
-  const hexLength = 64;
-
-  // Generate a 64-character (32-byte) hex value
-  for (let i = 0; i < hexLength / 8; i++) {
-    // Generate a random 8-character hex segment
-    const segment = Math.floor(Math.random() * 0xffffffff)
-      .toString(16)
-      .padStart(8, "0");
-    randomHex += segment;
-  }
-  validTestSet.add(randomHex); // Convert each number to a string and add it to the Set
-}
 const invalidTestSet = new Set<string>();
-for (let i = 1000; i <= 3000; i++) {
-  const hexLength = 64; // Desired length of each hex value
 
-  let randomHex = "";
+addUniqueRandomIdsToSet(validTestSet, invalidTestSet, 1000, true);
+addUniqueRandomIdsToSet(validTestSet, invalidTestSet, 2000, false);
 
-  // Generate a 64-character (32-byte) hex value
-  for (let i = 0; i < hexLength / 8; i++) {
-    // Generate a random 8-character hex segment
-    const segment = Math.floor(Math.random() * 0xffffffff)
-      .toString(16)
-      .padStart(8, "0");
-    randomHex += segment;
-  }
-  invalidTestSet.add(randomHex); // Convert each number to a string and add it to the Set
-}
-const result = constructBFC(validTestSet, invalidTestSet, 2000);
-
-test("convert set to binary", () => {
-  const resultSet = new Set([
-    "602b4b2b81f063d07107772b735810e238007d84df71baf9ad37fe58b4daff38",
-  ]);
-  const binarySet = convertSetToBinary(resultSet);
-  expect(binarySet.size).toBe(1);
-  expect(binarySet.values().next().value).toBe(
-    "0110000000101011010010110010101110000001111100000110001111010000011100010000011101110111001010110111001101011000000100001110001000111000000000000111110110000100110111110111000110111010111110011010110100110111111111100101100010110100110110101111111100111000",
-  );
-});
+const cascade = CRSetCascade.fromSets(validTestSet, invalidTestSet, 3000);
 
 test("if first layer of bloom filter is implemented correctly", () => {
-  const filter = result[0];
-  const firstLayer = filter[0];
-  const validTestSetFirst: Set<string> = convertSetToBinary(validTestSet);
+  const filters = cascade.getLayers();
+  const firstLayer = filters[0];
 
-  validTestSetFirst.forEach((id) => {
+  validTestSet.forEach((id) => {
     const cascadeLevel = 1;
-    id = id + cascadeLevel.toString(2).padStart(8, "0") + result[1];
+    id = id + cascadeLevel.toString(2).padStart(8, "0") + cascade.getSalt();
     expect(firstLayer?.test(id)).toBe(true);
-    // expect(isInBFC(id,result[0],result[1])).toBe(true)
   });
 });
 
 test("if second layer of bloom filter is implemented correctly", () => {
-  const filter = result[0];
-  const firstLayer = filter[0];
-  const secondLayer = filter[1];
-  const invalidTestSetFirst: Set<string> = convertSetToBinary(invalidTestSet);
+  const filters = cascade.getLayers();
+  const firstLayer = filters[0];
+  const secondLayer = filters[1];
   const falsePositives = new Set<string>();
-  invalidTestSetFirst.forEach((id) => {
+  invalidTestSet.forEach((id) => {
     const cascadeLevel = 1;
-    const id_test = id + cascadeLevel.toString(2).padStart(8, "0") + result[1];
+    const id_test =
+      id + cascadeLevel.toString(2).padStart(8, "0") + cascade.getSalt();
     if (firstLayer?.test(id_test)) {
       falsePositives.add(id);
     }
@@ -80,106 +37,83 @@ test("if second layer of bloom filter is implemented correctly", () => {
     const cascadeLevel = 2;
     expect(
       secondLayer?.test(
-        id + cascadeLevel.toString(2).padStart(8, "0") + result[1],
+        id + cascadeLevel.toString(2).padStart(8, "0") + cascade.getSalt(),
       ),
     ).toBe(true);
   });
 });
 
-test("enforce rHat minimum depending on input data", () => {
-  const validTestSets = new Set<string>();
-  for (let i = 1; i <= 1000; i++) {
-    let randomHex = "";
-    const hexLength = 64;
-    // Generate a 64-character (32-byte) hex value
-    for (let i = 0; i < hexLength / 8; i++) {
-      // Generate a random 8-character hex segment
-      const segment = Math.floor(Math.random() * 0xffffffff)
-        .toString(16)
-        .padStart(8, "0");
-      randomHex += segment;
-    }
-    validTestSets.add(randomHex);
-  }
-
-  const invalidTestSets = new Set<string>();
-  for (let i = 1000; i <= 3000; i++) {
-    const hexLength = 64;
-    let randomHex = "";
-    for (let i = 0; i < hexLength / 8; i++) {
-      const segment = Math.floor(Math.random() * 0xffffffff)
-        .toString(16)
-        .padStart(8, "0");
-      randomHex += segment;
-    }
-    invalidTestSets.add(randomHex);
-  }
-
-  expect(() => constructBFC(validTestSets, invalidTestSets, 800)).toThrow(
-    RangeError,
-  );
+test("if rHat minimum is enforced", () => {
+  expect(() =>
+    CRSetCascade.fromSets(validTestSet, invalidTestSet, 900),
+  ).toThrow(RangeError);
 });
 
-test("if the valid VC is in the Bloomfilter with the correct implementation of isInBFC()", () => {
+test("if the valid VCs are in the cascade", () => {
   validTestSet.forEach((id) => {
-    expect(isInBFC(id, result[0], result[1])).toBe(true);
+    expect(cascade.has(id)).toBe(true);
   });
 });
 
-test("if the invalid VC is in the BLoomfilter with the correct implementation of isInBFC()", () => {
+test("if the invalid VCs are not in the cascade", () => {
   invalidTestSet.forEach((id) => {
-    expect(isInBFC(id, result[0], result[1])).toBe(false);
+    expect(cascade.has(id)).toBe(false);
   });
 });
 
-test("serialized the Bloomfilter correctly", () => {
-  const deserializedResult = fromDataHexString(toDataHexString(result));
+test("if a deserialized cascade is equal to the original cascade", () => {
+  const serialized = cascade.toDataHexString();
+  const deserializedCascade = CRSetCascade.fromDataHexString(serialized);
 
-  // Test that both filters behave the same way
   validTestSet.forEach((id) => {
-    const originalResult = isInBFC(id, result[0], result[1]);
-    const deserializedResultValue = isInBFC(
-      id,
-      deserializedResult[0],
-      deserializedResult[1],
-    );
-    expect(originalResult).toBe(deserializedResultValue);
+    const originalResult = cascade.has(id);
+    const deserializedResult = deserializedCascade.has(id);
+    expect(originalResult).toBe(deserializedResult);
   });
 
   invalidTestSet.forEach((id) => {
-    const originalResult = isInBFC(id, result[0], result[1]);
-    const deserializedResultValue = isInBFC(
-      id,
-      deserializedResult[0],
-      deserializedResult[1],
-    );
-    expect(originalResult).toBe(deserializedResultValue);
+    const originalResult = cascade.has(id);
+    const deserializedResult = deserializedCascade.has(id);
+    expect(originalResult).toBe(deserializedResult);
   });
 
-  // Compare salt strings
-  expect(result[1]).toStrictEqual(deserializedResult[1]);
+  expect(cascade.getSalt()).toStrictEqual(deserializedCascade.getSalt());
+  expect(cascade.getDepth()).toStrictEqual(deserializedCascade.getDepth());
 
-  // Compare lengths
-  expect(result[0].length).toStrictEqual(deserializedResult[0].length);
-
-  // Compare the actual bit arrays of each filter
-  for (let i = 0; i < result[0].length; i++) {
-    expect(result[0][i].buckets).toStrictEqual(
-      deserializedResult[0][i].buckets,
+  const originalFilters = cascade.getLayers();
+  const deserializedFilters = deserializedCascade.getLayers();
+  for (let i = 0; i < originalFilters.length; i++) {
+    expect(originalFilters[i].buckets).toStrictEqual(
+      deserializedFilters[i].buckets,
     );
   }
 });
 
-test("see if serialized deserialized Bloomfilter works properly", () => {
-  const deserializedResult = fromDataHexString(toDataHexString(result));
+test("if a deserialized cascade with appended zeros is equal to the original cascade", () => {
+  const serialized =
+    cascade.toDataHexString() + "00000000000000000000000000000000";
+  const deserializedCascade = CRSetCascade.fromDataHexString(serialized);
+
   validTestSet.forEach((id) => {
-    expect(isInBFC(id, deserializedResult[0], deserializedResult[1])).toBe(
-      true,
-    );
+    const originalResult = cascade.has(id);
+    const deserializedResult = deserializedCascade.has(id);
+    expect(originalResult).toBe(deserializedResult);
   });
-  for (const id of invalidTestSet) {
-    expect(isInBFC(id, deserializedResult[0], deserializedResult[1])).toBe(
-      false,
+
+  invalidTestSet.forEach((id) => {
+    const originalResult = cascade.has(id);
+    const deserializedResult = deserializedCascade.has(id);
+    expect(originalResult).toBe(deserializedResult);
+  });
+
+  expect(cascade.getSalt()).toStrictEqual(deserializedCascade.getSalt());
+  expect(cascade.getDepth()).toStrictEqual(deserializedCascade.getDepth());
+
+  const originalFilters = cascade.getLayers();
+  const deserializedFilters = deserializedCascade.getLayers();
+  for (let i = 0; i < originalFilters.length; i++) {
+    expect(originalFilters[i].buckets).toStrictEqual(
+      deserializedFilters[i].buckets,
     );
   }
 });
