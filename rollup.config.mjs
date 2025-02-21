@@ -36,6 +36,8 @@ const config = [
       sourcemap: true,
       preserveModules: true,
       preserveModulesRoot: "src",
+      entryFileNames: "[name].cjs",
+      extend: true
     },
     plugins: [
       typescript({
