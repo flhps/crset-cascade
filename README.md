@@ -16,31 +16,32 @@ npm install github:jfelixh/crset-cascade
 Then, in your project, import the necessary functions and use them as follows:
 
 ```typescript
-import CRSetCascade from "crset-cascade";
+import { CRSetCascade, random256BitHexString } from "crset-cascade";
 
-const element: string = "..."; // Element to check later on if it is in the CRSet cascade
+// Elements have to be of uniform generation and must use this method to generate them
+const element: string = random256BitHexString();
 
 // Construct a CRSet cascade
 const validElements: Set<string> = new Set([element, "...", "..."]); // Set of valid elements
 const invalidElements: Set<string> = new Set(["...", "...", "..."]); // Set of invalid elements
-const rHat: number = x; // Padding size x, where rHat >= |validElements|
-const constructedBFC = CRSetCascade.fromSets(
+const rHat: number = x; // Total targeted size x, where rHat >= |validElements| and rHat >= 2*|invalidElements|
+const cascade = CRSetCascade.fromSets(
   validElements,
   invalidElements,
   rHat,
 );
 
 // Check if an element is in the CRSet cascade
-const result = constructedBFC.has(element); // true if the element is in the CRSet cascade, false otherwise
+const result = cascade.has(element); // true if the element is in the CRSet cascade, false otherwise
 
 // Serialize and deserialize the CRSet cascade
-const filterHexString = constructedBFC.toDataHexString(); // Hexadecimal string representing the CRSet cascade
+const filterHexString = cascade.toDataHexString(); // Hexadecimal string representing the CRSet cascade
 const [filter, salt] = CRSetCascade.fromDataHexString(filterHexString); // Reconstruct the CRSet cascade from the hexadecimal string
 
 // Get information about the CRSet cascade
-const depth = constructedBFC.getDepth(); // number of layers in the CRSet cascade
-const layers = constructedBFC.getLayers(); // array of Bloom filters
-const salt = constructedBFC.getSalt(); // salt used to construct the CRSet cascade
+const depth = cascade.getDepth(); // number of layers in the CRSet cascade
+const layers = cascade.getLayers(); // array of Bloom filters
+const salt = cascade.getSalt(); // salt used to construct the CRSet cascade
 ```
 
 ## Testing
