@@ -32,7 +32,9 @@ export class CRSetCascade {
     const neededR = rHat - validIds.size;
     const neededS = sHat - revokedIds.size;
 
+    validIds = new Set(validIds);
     addUniqueRandomIdsToSet(validIds, revokedIds, neededR, true);
+    revokedIds = new Set(revokedIds);
     addUniqueRandomIdsToSet(validIds, revokedIds, neededS, false);
 
     const salt = random256BitHexString();

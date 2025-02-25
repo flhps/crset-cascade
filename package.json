@@ -1,6 +1,6 @@
 {
   "name": "crset-cascade",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "description": "Implementation of a padded bloom filter cascade for CRSet.",
   "type": "module",
