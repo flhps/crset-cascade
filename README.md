@@ -52,6 +52,10 @@ To verify that this implementation works as expected, run the following command 
 npm test
 ```
 
+## Acknowledgments
+
+We thank the Ethereum Foundation for funding this work with an Ethereum Academic Grant under reference number FY24-1545.
+
 ## Links and References
 
 - ![arXiv](https://img.shields.io/badge/arXiv-2501.17089-b31b1b.svg)
