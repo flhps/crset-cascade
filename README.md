@@ -10,7 +10,7 @@ This project implements a padded Bloom filter cascade based on `sha256`. It prov
 This package can be installed directly from the repository:
 
 ```bash
-npm install github:jfelixh/crset-cascade
+npm install github:flhps/crset-cascade
 ```
 
 Then, in your project, import the necessary functions and use them as follows:
