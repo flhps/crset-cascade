@@ -2,8 +2,8 @@
 
 This project implements a padded Bloom filter cascade based on `sha256`. It provides utility functions to construct, reconstruct, and verify the presence of elements within the padded Bloom filter cascade. It is intended as a library for the CRSet revocation mechanism for Verifiable Credentials. Instead of using this library directly, consider using the respective higher-level ones for issuers and verifiers:
 
-- ![GitHub](https://img.shields.io/badge/GitHub-crset--issuer--backend-blue?logo=github) [**for issuers.**](https://github.com/jfelixh/crset-issuer-backend)
-- ![GitHub](https://img.shields.io/badge/GitHub-crset--check-blue?logo=github) [**for verifiers.**](https://github.com/jfelixh/crset-check)
+- ![GitHub](https://img.shields.io/badge/GitHub-crset--issuer--backend-blue?logo=github) [**for issuers.**](https://github.com/flhps/crset-issuer-backend)
+- ![GitHub](https://img.shields.io/badge/GitHub-crset--check-blue?logo=github) [**for verifiers.**](https://github.com/flhps/crset-check)
 
 ## Usage
 
@@ -25,11 +25,7 @@ const element: string = random256BitHexString();
 const validElements: Set<string> = new Set([element, "...", "..."]); // Set of valid elements
 const invalidElements: Set<string> = new Set(["...", "...", "..."]); // Set of invalid elements
 const rHat: number = x; // Total targeted size x, where rHat >= |validElements| and rHat >= 2*|invalidElements|
-const cascade = CRSetCascade.fromSets(
-  validElements,
-  invalidElements,
-  rHat,
-);
+const cascade = CRSetCascade.fromSets(validElements, invalidElements, rHat);
 
 // Check if an element is in the CRSet cascade
 const result = cascade.has(element); // true if the element is in the CRSet cascade, false otherwise
