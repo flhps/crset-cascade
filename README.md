@@ -11,6 +11,7 @@ This package can be installed directly from the repository:
 
 ```bash
 npm install github:flhps/crset-cascade
+pnpm add github:flhps/crset-cascade
 ```
 
 Then, in your project, import the necessary functions and use them as follows:
@@ -45,7 +46,7 @@ const salt = cascade.getSalt(); // salt used to construct the CRSet cascade
 To verify that this implementation works as expected, run the following command in the root directory:
 
 ```bash
-npm test
+pnpm run test
 ```
 
 ## Acknowledgments
