@@ -1,20 +1,20 @@
 {
   "name": "crset-cascade",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "description": "Implementation of a padded bloom filter cascade for CRSet.",
   "type": "module",
   "keywords": [
     "crset bloom filter cascade"
   ],
-  "homepage": "https://github.com/jfelixh/crset-cascade",
+  "homepage": "https://github.com/flhps/crset-cascade",
   "author": {
     "name": "Felix Hoops",
-    "url": "https://github.com/jfelixh"
+    "url": "https://github.com/flhps"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jfelixh/crset-cascade.git"
+    "url": "https://github.com/flhps/crset-cascade.git"
   },
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
@@ -55,6 +55,7 @@
     "rollup": "^4.31.0",
     "rollup-plugin-dts": "^6.1.1",
     "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.1"
