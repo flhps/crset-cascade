@@ -56,5 +56,4 @@ We thank the Ethereum Foundation for funding this work with an Ethereum Academic
 ## Links and References
 
 - ![arXiv](https://img.shields.io/badge/arXiv-2501.17089-b31b1b.svg)
-  **[CRSet: Non-Interactive Verifiable Credential Revocation with Metadata Privacy for Issuers and Everyone Else](https://arxiv.org/abs/2501.17089)**  
-  _Hoops et al., 2025._
+  **[CRSet: Private Non-Interactive Verifiable Credential Revocation](https://arxiv.org/abs/2501.17089)**
